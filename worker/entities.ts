@@ -5,13 +5,13 @@ import { calculateReview, INITIAL_SRS } from "../src/lib/sm2";
 export class CodalEntity extends IndexedEntity<CodalProvision> {
   static readonly entityName = "codal";
   static readonly indexName = "codals";
-  static readonly initialState: CodalProvision = { 
-    id: "", 
-    subject: "Civil Law", 
-    title: "", 
-    content: "", 
-    reference: "", 
-    isOfficial: false, 
+  static readonly initialState: CodalProvision = {
+    id: "",
+    subject: "Civil Law",
+    title: "",
+    content: "",
+    reference: "",
+    isOfficial: false,
     ownerId: "dev-user",
     tags: [],
     difficulty: "Medium"
@@ -33,21 +33,45 @@ export class UserEntity extends Entity<UserState> {
     const state = await this.getState();
     const now = Date.now();
     const dueItems = Object.values(state.progress).filter(p => p.srs.dueDate <= now);
+    // Dynamic Streak Calculation
+    const reviewDates = new Set<string>();
+    Object.values(state.progress).forEach(p => {
+      p.history.forEach(h => {
+        reviewDates.add(new Date(h.date).toISOString().split('T')[0]);
+      });
+    });
+    let streak = 0;
+    const sortedDates = Array.from(reviewDates).sort((a, b) => b.localeCompare(a));
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(now - 86400000).toISOString().split('T')[0];
+    if (sortedDates.length > 0 && (sortedDates[0] === today || sortedDates[0] === yesterday)) {
+      streak = 1;
+      for (let i = 0; i < sortedDates.length - 1; i++) {
+        const d1 = new Date(sortedDates[i]);
+        const d2 = new Date(sortedDates[i+1]);
+        const diff = (d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24);
+        if (diff <= 1.1) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+    }
     const examDate = new Date('2026-09-20').getTime();
     const daysToExam = Math.ceil((examDate - now) / (1000 * 60 * 60 * 24));
     return {
       dueCount: dueItems.length,
-      streak: 5,
+      streak,
       totalMastered: Object.values(state.progress).filter(p => p.srs.repetitions > 3).length,
-      nextExamDays: daysToExam
+      nextExamDays: Math.max(0, daysToExam)
     };
   }
   async getAnalytics(env: any) {
     const state = await this.getState();
     const allCodals = await CodalEntity.list(env);
+    const subjects = ['Political Law', 'Labor Law', 'Civil Law', 'Taxation Law', 'Mercantile Law', 'Criminal Law', 'Remedial Law', 'Legal Ethics'];
     const codalsBySubject: Record<string, number> = {};
     const masteredBySubject: Record<string, number> = {};
-    const subjects = ['Political Law', 'Labor Law', 'Civil Law', 'Taxation Law', 'Mercantile Law', 'Criminal Law', 'Remedial Law', 'Legal Ethics'];
     subjects.forEach(s => {
       codalsBySubject[s] = 0;
       masteredBySubject[s] = 0;
@@ -87,7 +111,7 @@ export class UserEntity extends Entity<UserState> {
     });
     return {
       masteryData,
-      retentionRate: Math.round((avgEase / 2.5) * 100),
+      retentionRate: Math.round((avgEase / 3.0) * 100), // Adjusted denominator for realistic retention
       heatmap: Object.entries(heatmap).map(([date, count]) => ({ date, count })).reverse(),
       totalReviews: allProgress.reduce((acc, p) => acc + p.history.length, 0)
     };
@@ -115,14 +139,16 @@ export class UserEntity extends Entity<UserState> {
   async getDueQueue(env: any) {
     const state = await this.getState();
     const now = Date.now();
+    // Sort by due date (oldest first)
     const dueIds = Object.values(state.progress)
       .filter(p => p.srs.dueDate <= now)
       .sort((a, b) => a.srs.dueDate - b.srs.dueDate)
       .map(p => p.codalId);
     if (dueIds.length > 0) {
-      return Promise.all(dueIds.map(id => new CodalEntity(env, id).getState()));
+      const results = await Promise.all(dueIds.map(id => new CodalEntity(env, id).getState()));
+      return results.filter(r => !!r.id);
     }
-    // Prioritize unstudied items: User-owned first, then system
+    // New items queue
     const allCodals = await CodalEntity.list(env);
     const unstudied = allCodals.items.filter(c => !state.progress[c.id]);
     const userOwned = unstudied.filter(c => c.ownerId === this.id);
