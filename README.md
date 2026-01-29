@@ -1,6 +1,6 @@
 # Cloudflare Workers + React Starter Template
 
-[![Deploy to Cloudflare][cloudflarebutton]]
+[![Deploy to Cloudflare][![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/onelasttry-ambisyoso/barmaster-ph-elite-bar-exam-prep-platform)]
 
 A production-ready full-stack starter template for Cloudflare Workers featuring a Vite/React frontend, Hono backend, and Durable Objects for scalable entity storage (users, chats, messages). Perfect for building real-time apps with zero-config deployment.
 
@@ -139,7 +139,7 @@ Deploy to Cloudflare Workers with Pages/Assets for the frontend:
    bunx wrangler pages deploy dist --project-name=<your-pages-project>
    ```
 
-[![Deploy to Cloudflare][cloudflarebutton]]
+[![Deploy to Cloudflare][![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/onelasttry-ambisyoso/barmaster-ph-elite-bar-exam-prep-platform)]
 
 ## Customization
 
