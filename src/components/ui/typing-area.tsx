@@ -1,7 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-export interface TypingAreaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+type TypingAreaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 const TypingArea = React.forwardRef<HTMLTextAreaElement, TypingAreaProps>(
   ({ className, ...props }, ref) => {
     const textareaRef = React.useRef<HTMLTextAreaElement | null>(null)
