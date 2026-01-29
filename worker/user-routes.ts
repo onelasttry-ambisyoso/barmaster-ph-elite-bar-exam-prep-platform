@@ -10,12 +10,18 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
   // DASHBOARD
   app.get('/api/dashboard', async (c) => {
-    const userId = "dev-user"; // Simplified for phase 1
+    const userId = "dev-user";
     const user = new UserEntity(c.env, userId);
     if (!await user.exists()) {
       await user.save({ id: userId, name: "Bar Aspirant", joinedAt: Date.now(), progress: {} });
     }
     return ok(c, await user.getDashboardData(c.env));
+  });
+  // ANALYTICS
+  app.get('/api/analytics', async (c) => {
+    const userId = "dev-user";
+    const user = new UserEntity(c.env, userId);
+    return ok(c, await user.getAnalytics(c.env));
   });
   // PRACTICE QUEUE
   app.get('/api/practice/queue', async (c) => {

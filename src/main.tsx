@@ -14,6 +14,7 @@ import '@/index.css'
 import { HomePage } from '@/pages/HomePage'
 import PracticePage from '@/pages/PracticePage'
 import { SubjectPage } from '@/pages/SubjectPage'
+import { ProgressPage } from '@/pages/ProgressPage'
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {
@@ -29,6 +30,11 @@ const router = createBrowserRouter([
   {
     path: "/subjects",
     element: <SubjectPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/progress",
+    element: <ProgressPage />,
     errorElement: <RouteErrorBoundary />,
   },
 ]);

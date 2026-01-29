@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Book, Search, Filter, BookOpen, GraduationCap } from 'lucide-react';
+import { Search, Filter, BookOpen, GraduationCap } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api-client';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -19,16 +19,16 @@ export function SubjectPage() {
     queryKey: ['codals'],
     queryFn: () => api('/api/codals')
   });
-  const codals = codalsResponse?.items || [];
   const subjects = ['Political Law', 'Labor Law', 'Civil Law', 'Taxation Law', 'Mercantile Law', 'Criminal Law', 'Remedial Law', 'Legal Ethics'] as Subject[];
   const filteredCodals = useMemo(() => {
+    const codals = codalsResponse?.items || [];
     return codals.filter(c => {
       const matchesSubject = c.subject === currentSubject;
-      const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            c.content.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesSubject && matchesSearch;
     });
-  }, [codals, currentSubject, searchQuery]);
+  }, [codalsResponse, currentSubject, searchQuery]);
   return (
     <AppLayout container>
       <div className="space-y-8">
@@ -43,24 +43,24 @@ export function SubjectPage() {
           </div>
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search provisions..." 
+            <Input
+              placeholder="Search provisions..."
               className="pl-9 bg-secondary/50 border-none ring-offset-background focus-visible:ring-1"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </header>
-        <Tabs 
-          defaultValue={currentSubject} 
+        <Tabs
+          defaultValue={currentSubject}
           onValueChange={(val) => setSearchParams({ subject: val })}
           className="space-y-6"
         >
           <div className="overflow-x-auto pb-2">
             <TabsList className="bg-transparent h-auto p-0 flex justify-start gap-2 min-w-max">
               {subjects.map(s => (
-                <TabsTrigger 
-                  key={s} 
+                <TabsTrigger
+                  key={s}
                   value={s}
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border px-4 py-2 rounded-full text-xs font-semibold"
                 >
@@ -96,15 +96,15 @@ export function SubjectPage() {
                         "{codal.content}"
                       </CardDescription>
                       <div className="flex gap-2">
-                        <Button 
+                        <Button
                           className="flex-1 rounded-full gap-2 text-xs font-bold"
                           onClick={() => navigate('/practice')}
                         >
                           <GraduationCap className="h-3 w-3" /> Master Now
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="rounded-full border"
                         >
                           <Filter className="h-3 w-3" />

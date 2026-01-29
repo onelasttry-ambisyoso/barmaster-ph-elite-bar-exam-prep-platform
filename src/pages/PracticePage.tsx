@@ -7,6 +7,7 @@ import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { TypingArea } from '@/components/ui/typing-area';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { CodalProvision } from '@shared/types';
 import confetti from 'canvas-confetti';
@@ -38,7 +39,12 @@ export default function PracticePage() {
     if (!typed.trim()) return;
     setIsChecking(true);
     if (typed.trim().toLowerCase() === current?.content.trim().toLowerCase()) {
-      confetti({ particleCount: 150, spread: 80, origin: { y: 0.7 }, colors: ['#fbbf24', '#1e40af', '#ffffff'] });
+      confetti({ 
+        particleCount: 150, 
+        spread: 80, 
+        origin: { y: 0.7 }, 
+        colors: ['#fbbf24', '#1e40af', '#ffffff'] 
+      });
     }
   };
   const submitGrade = (grade: number) => {
@@ -47,9 +53,8 @@ export default function PracticePage() {
   };
   const revealAnswer = () => {
     setIsChecking(true);
-    setTyped(''); // Clear it to show complete red/green diff
+    setTyped(''); 
   };
-  // Keyboard Shortcuts
   useHotkeys('enter', () => !isChecking && handleCheck(), { enableOnFormTags: true }, [isChecking]);
   useHotkeys('1', () => isChecking && submitGrade(1), {}, [isChecking]);
   useHotkeys('2', () => isChecking && submitGrade(2), {}, [isChecking]);

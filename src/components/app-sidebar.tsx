@@ -1,15 +1,15 @@
 import React from "react";
-import { 
-  LayoutDashboard, 
-  Library, 
-  Swords, 
-  LineChart, 
-  Gavel, 
-  Scale, 
-  BookOpen, 
-  ShieldAlert, 
-  Briefcase, 
-  UserRound, 
+import {
+  LayoutDashboard,
+  Library,
+  Swords,
+  LineChart,
+  Gavel,
+  Scale,
+  BookOpen,
+  ShieldAlert,
+  Briefcase,
+  UserRound,
   Zap
 } from "lucide-react";
 import {
@@ -70,6 +70,11 @@ export function AppSidebar(): JSX.Element {
                 <Link to="/practice"><Swords className="size-4" /> <span>Practice Arena</span></Link>
               </SidebarMenuButton>
               <SidebarMenuBadge>5</SidebarMenuBadge>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={location.pathname === "/progress"}>
+                <Link to="/progress"><LineChart className="size-4" /> <span>Progress & Analytics</span></Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
