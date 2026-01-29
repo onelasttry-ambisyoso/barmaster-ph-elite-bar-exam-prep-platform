@@ -5,7 +5,17 @@ import { calculateReview, INITIAL_SRS } from "../src/lib/sm2";
 export class CodalEntity extends IndexedEntity<CodalProvision> {
   static readonly entityName = "codal";
   static readonly indexName = "codals";
-  static readonly initialState: CodalProvision = { id: "", subject: "Civil Law", title: "", content: "", reference: "" };
+  static readonly initialState: CodalProvision = { 
+    id: "", 
+    subject: "Civil Law", 
+    title: "", 
+    content: "", 
+    reference: "", 
+    isOfficial: false, 
+    ownerId: "dev-user",
+    tags: [],
+    difficulty: "Medium"
+  };
   static seedData = MOCK_CODALS;
 }
 export interface UserState extends User {
@@ -37,17 +47,14 @@ export class UserEntity extends Entity<UserState> {
     const allCodals = await CodalEntity.list(env);
     const codalsBySubject: Record<string, number> = {};
     const masteredBySubject: Record<string, number> = {};
-    // Subjects List
     const subjects = ['Political Law', 'Labor Law', 'Civil Law', 'Taxation Law', 'Mercantile Law', 'Criminal Law', 'Remedial Law', 'Legal Ethics'];
     subjects.forEach(s => {
       codalsBySubject[s] = 0;
       masteredBySubject[s] = 0;
     });
-    // Count available codals
     allCodals.items.forEach(c => {
       if (codalsBySubject[c.subject] !== undefined) codalsBySubject[c.subject]++;
     });
-    // Count mastered per subject
     Object.values(state.progress).forEach(p => {
       const codal = allCodals.items.find(c => c.id === p.codalId);
       if (codal && p.srs.repetitions > 3) {
@@ -60,12 +67,10 @@ export class UserEntity extends Entity<UserState> {
       total: codalsBySubject[s] || 1,
       percentage: Math.round((masteredBySubject[s] / (codalsBySubject[s] || 1)) * 100)
     }));
-    // Ease Factor (Retention Rate)
     const allProgress = Object.values(state.progress);
-    const avgEase = allProgress.length > 0 
-      ? allProgress.reduce((acc, p) => acc + p.srs.easeFactor, 0) / allProgress.length 
+    const avgEase = allProgress.length > 0
+      ? allProgress.reduce((acc, p) => acc + p.srs.easeFactor, 0) / allProgress.length
       : 2.5;
-    // Activity Heatmap (Last 30 days)
     const heatmap: Record<string, number> = {};
     const now = new Date();
     for (let i = 0; i < 30; i++) {
@@ -112,13 +117,16 @@ export class UserEntity extends Entity<UserState> {
     const now = Date.now();
     const dueIds = Object.values(state.progress)
       .filter(p => p.srs.dueDate <= now)
+      .sort((a, b) => a.srs.dueDate - b.srs.dueDate)
       .map(p => p.codalId);
-    if (dueIds.length === 0) {
-      const allCodals = await CodalEntity.list(env, null, 10);
-      const unstudied = allCodals.items.filter(c => !state.progress[c.id]);
-      return unstudied.slice(0, 5);
+    if (dueIds.length > 0) {
+      return Promise.all(dueIds.map(id => new CodalEntity(env, id).getState()));
     }
-    const codals = await Promise.all(dueIds.map(id => new CodalEntity(env, id).getState()));
-    return codals;
+    // Prioritize unstudied items: User-owned first, then system
+    const allCodals = await CodalEntity.list(env);
+    const unstudied = allCodals.items.filter(c => !state.progress[c.id]);
+    const userOwned = unstudied.filter(c => c.ownerId === this.id);
+    const systemOwned = unstudied.filter(c => c.isOfficial);
+    return [...userOwned, ...systemOwned].slice(0, 5);
   }
 }

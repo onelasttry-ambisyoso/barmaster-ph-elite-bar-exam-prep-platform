@@ -10,7 +10,8 @@ import {
   ShieldAlert,
   Briefcase,
   UserRound,
-  Zap
+  Zap,
+  PencilLine
 } from "lucide-react";
 import {
   Sidebar,
@@ -70,6 +71,11 @@ export function AppSidebar(): JSX.Element {
                 <Link to="/practice"><Swords className="size-4" /> <span>Practice Arena</span></Link>
               </SidebarMenuButton>
               <SidebarMenuBadge>5</SidebarMenuBadge>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={location.pathname === "/codals-editor"}>
+                <Link to="/codals-editor"><PencilLine className="size-4" /> <span>Codal Editor</span></Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={location.pathname === "/progress"}>

@@ -3,7 +3,7 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
 }
-export type Subject = 
+export type Subject =
   | 'Political Law'
   | 'Labor Law'
   | 'Civil Law'
@@ -12,12 +12,17 @@ export type Subject =
   | 'Criminal Law'
   | 'Remedial Law'
   | 'Legal Ethics';
+export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 export interface CodalProvision {
   id: string;
   subject: Subject;
   title: string; // e.g., "Article 1"
   content: string; // The full text to type
   reference: string; // e.g., "Civil Code of the Philippines"
+  ownerId?: string;
+  isOfficial?: boolean;
+  tags?: string[];
+  difficulty?: Difficulty;
 }
 export interface SRSParams {
   interval: number;
